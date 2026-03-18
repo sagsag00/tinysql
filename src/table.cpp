@@ -21,28 +21,114 @@ bool Database::addRow(const std::string& tableName, const Row& row){
     return true;
 }
 
+std::vector<Row> Database::select(const std::string& tableName){
+    Table* table = getTable(tableName);
+    if (!table) return {};
+
+    std::vector<int> colIndices;
+    for(int i = 0; i < table->columns.size(); i++){
+        colIndices.push_back(i);
+    }
+
+    return iterateRows(table, colIndices);
+}
+
+std::vector<Row> Database::select(const std::string& tableName, const std::vector<Column>& columns){
+    Table* table = getTable(tableName);
+    if (!table) return {};
+
+    std::vector<int> colIndices;
+    for (const Column& col : columns){
+        bool found = false;
+        for(int i = 0; i < table->columns.size(); i++){
+            if(table->columns[i].name == col.name){
+                colIndices.push_back(i);
+                found = true;
+                break;
+            }
+        }
+        if (!found){
+            throw std::runtime_error("Column " + col.name + " does not exist in table " + tableName);
+        }
+    }
+
+    return iterateRows(table, colIndices);
+}
+
+std::vector<Row> Database::select(const std::string& tableName, const Column& column, const Value& value){
+    Table* table = getTable(tableName);
+    if(!table) return {};
+
+    int index = getColumnIndex(table, column);
+
+    std::vector<Row> result;
+    for (const Row& row : table->rows){
+        if(compareValue(row.values[index], value)){
+            result.push_back(row);
+        } 
+    }
+
+    return result;
+}
+
+bool Database::deleteFrom(const std::string& tableName, const Column& column, const Value& value){
+    Table* table = getTable(tableName);
+    if(!table) return false;
+
+    int index = getColumnIndex(table, column);
+
+    std::vector<Row> rows = table->rows;
+    size_t originalSize = rows.size();
+
+    rows.erase(
+        std::remove_if(rows.begin(), rows.end(),
+            [&](const Row& r){ return compareValue(r.values[index], value); }),
+        rows.end()
+    );
+
+    return rows.size() < originalSize;
+}
+
 bool Database::deleteTable(const std::string& name){
     return tables.erase(name) > 0;
 }
 
 bool Database::deleteTable(const Table& table){
-    return tables.erase(table.name) > 0;
+    return tables.erase(table.name) > 0; 
 }
 
-bool Database::deleteRow(const std::string& tableName, const Row& row){
-    Table* table = getTable(tableName);
-    if(!table) return false;
-    return deleteRow(*table, row);
+bool Database::compareValue(const Value& a, const Value& b){
+    if(a.index() != b.index()) return false;
+    return a == b;
 }
 
-bool Database::deleteRow(Table& table, const Row& row) {
-    std::vector<Row>::iterator it = std::find_if(table.rows.begin(), table.rows.end(),
-        [&](const Row& r) { return r.values == row.values; });
+std::vector<Row> Database::iterateRows(Table* table, std::vector<int>& colIndices){
+    std::vector<Row> result;
 
-    if (it != table.rows.end()) {
-        table.rows.erase(it);
-        return true;
+    for (const Row& row : table->rows){
+        Row newRow;
+        for(int idx : colIndices){
+            if(idx >= 0 && idx < row.values.size()){
+                newRow.values.push_back(row.values[idx]);
+            }
+        }
+        result.push_back(newRow);
     }
 
-    return false;
+    return result;
+}
+
+int Database::getColumnIndex(Table* table, const Column& column){
+    int index = -1;
+    for(int i = 0; i < table->columns.size(); i++){
+        if(table->columns[i].name == column.name){
+            index = i;
+            break;
+        }
+    }
+
+    if(index == -1){
+        throw std::runtime_error("Column " + column.name + " does not exist");
+    }
+    return index;
 }

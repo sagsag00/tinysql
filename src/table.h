@@ -31,12 +31,19 @@ struct Table{
 class Database{
 private:
     Tables tables;
+    static Database* instance;
+
+    Database() = default;
+    Database(const Database&) = delete;
+    Database& operator=(const Database&) = delete;
 
     std::vector<Row> iterateRows(Table* table, std::vector<int>& colIndices);
-    int getColumnIndex(Table* table, const Column& column);
+    int getColumnIndex(Table* table, const std::string& columnName);
     bool compareValue(const Value& a, const Value& b);
 
 public:
+    static Database* getInstance();
+
     // Adds a table to the database
     // @param table The table object
     void addTable(const Table& table);
@@ -67,14 +74,14 @@ public:
     // @param columns The column you want to select from
     // @param value The value you want to compare
     // @return All the values in the provided columns 
-    std::vector<Row> select(const std::string& tableName, const Column& column, const Value& value);
+    std::vector<Row> select(const std::string& tableName, const std::string& columnName, const Value& value);
 
     // Implementation of DELETE FROM <name> WHERE <col> = <value>
     // @param tableName The name of the table you want to delete from
     // @param columns The column you want to delete from
     // @param value The value you want to compare
     // @return true if any rows deleted, false otherwise
-    bool deleteFrom(const std::string& tableName, const Column& column, const Value& value);
+    bool deleteFrom(const std::string& tableName, const std::string& columnName, const Value& value);
 
     // Deletes a table by name
     // @param name The table name

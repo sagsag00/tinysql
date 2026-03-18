@@ -16,6 +16,7 @@ struct ParsedQuery {
     std::string tableName;
     std::optional<std::string> columnName;
     std::optional<Value> value;
+    std::optional<std::vector<Value>> values;
     std::optional<std::vector<Column>> columns;
 };
 
@@ -45,6 +46,13 @@ Column::Type parseColumnType(const std::string& raw);
 // @param i The current index, advanced in place
 // @return A vector of all the parsed columns
 std::vector<Column> parseColumnList(const std::vector<Token>& tokens, size_t& i);
+
+// Consumes a list of literal values from tokens starting at i
+// Stops at the first token that is not a literal or symbol
+// @param tokens The token list
+// @param i The current index, advanced in place
+// @return A vector of the parsed values
+std::vector<Value> parseValueList(const std::vector<Token>& tokens, size_t& i);
 
 // Parses a raw string as an int if possible, otherwise strips surrounding quotes and returns it as a string
 // @param raw The string to parse

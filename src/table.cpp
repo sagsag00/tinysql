@@ -1,5 +1,9 @@
 #include "table.h"
 
+Database* Database::getInstance(){
+    return instance;
+}
+
 void Database::addTable(const Table& table){
     tables[table.name] = table;
 }
@@ -55,11 +59,11 @@ std::vector<Row> Database::select(const std::string& tableName, const std::vecto
     return iterateRows(table, colIndices);
 }
 
-std::vector<Row> Database::select(const std::string& tableName, const Column& column, const Value& value){
+std::vector<Row> Database::select(const std::string& tableName, const std::string& columnName, const Value& value){
     Table* table = getTable(tableName);
     if(!table) return {};
 
-    int index = getColumnIndex(table, column);
+    int index = getColumnIndex(table, columnName);
 
     std::vector<Row> result;
     for (const Row& row : table->rows){
@@ -71,11 +75,11 @@ std::vector<Row> Database::select(const std::string& tableName, const Column& co
     return result;
 }
 
-bool Database::deleteFrom(const std::string& tableName, const Column& column, const Value& value){
+bool Database::deleteFrom(const std::string& tableName, const std::string& columnName, const Value& value){
     Table* table = getTable(tableName);
     if(!table) return false;
 
-    int index = getColumnIndex(table, column);
+    int index = getColumnIndex(table, columnName);
 
     std::vector<Row> rows = table->rows;
     size_t originalSize = rows.size();
@@ -118,17 +122,17 @@ std::vector<Row> Database::iterateRows(Table* table, std::vector<int>& colIndice
     return result;
 }
 
-int Database::getColumnIndex(Table* table, const Column& column){
+int Database::getColumnIndex(Table* table, const std::string& columnName){
     int index = -1;
     for(int i = 0; i < table->columns.size(); i++){
-        if(table->columns[i].name == column.name){
+        if(table->columns[i].name == columnName){
             index = i;
             break;
         }
     }
 
     if(index == -1){
-        throw std::runtime_error("Column " + column.name + " does not exist");
+        throw std::runtime_error("Column " + columnName + " does not exist");
     }
     return index;
 }

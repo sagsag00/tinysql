@@ -20,6 +20,16 @@ static Column::Type parseColumnType(const std::string& raw){
     throw std::runtime_error("Unknown column type: " + raw);
 }
 
+Value parseValue(const std::string& raw){
+    try{
+        return std::stoi(raw);
+    } catch (...) {
+        if(raw.size() >= 2 && (raw.front() == '\'' || raw.front() == '"'))
+            return raw.substr(1, raw.size() - 2);
+        return raw;
+    }
+}
+
 static std::vector<Column> parseColumnList(const std::vector<Token>& tokens, size_t& i){
     std::vector<Column> columns;
 
@@ -40,6 +50,23 @@ static std::vector<Column> parseColumnList(const std::vector<Token>& tokens, siz
     return columns;
 }
 
+std::vector<Value> parseValueList(const std::vector<Token>& tokens, size_t& i){
+    std::vector<Value> values;
+
+    while(i < tokens.size()){
+        const Token& t = tokens[i];
+
+        if(t.type == Token::SYMBOL) {i++; continue;}
+        
+        if(t.type != Token::LITERAL) break;
+
+        values.push_back(parseValue(t.value));
+        i++;
+    }
+
+    return values;
+}
+
 ParsedQuery parse(const std::vector<Token>& tokens, const std::string& action){
     ParsedQuery result;
     result.action = action;
@@ -54,14 +81,16 @@ ParsedQuery parse(const std::vector<Token>& tokens, const std::string& action){
             i++;  // move past table name into column list
             result.columns = parseColumnList(tokens, i);
         }
-
-        if(matchKeyword(t, "FROM") || matchKeyword(t, "INTO")){
+        else if(matchKeyword(t, "FROM") || matchKeyword(t, "INTO")){
             result.tableName = expect(tokens, i, Token::IDENTIFIER).value;
         }
         else if (matchKeyword(t, "WHERE")){
             result.columnName = expect(tokens, i, Token::IDENTIFIER).value;
             while(i + 1 < tokens.size() && tokens[i + 1].type == Token::SYMBOL) i++;
             result.value = parseValue(expect(tokens, i, Token::LITERAL).value);
+        } 
+        else if (matchKeyword(t, "VALUES")) {
+            result.values = parseValueList(tokens, i);
         }
     }
     return result;

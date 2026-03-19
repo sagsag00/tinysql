@@ -1,5 +1,16 @@
 #include "printer.h"
 
+static std::string toString(const std::variant<int, std::string>& v) {
+    return std::visit([](auto&& value) -> std::string {
+        using T = std::decay_t<decltype(value)>;
+
+        if constexpr (std::is_same_v<T, std::string>)
+            return value;
+        else
+            return std::to_string(value);
+    }, v);
+}
+
 void formatResult(const bool& success, const std::string& tableName, const std::string& action){
     std::cout << "The action: '" << action
           << " in table " << tableName 
@@ -62,15 +73,4 @@ void printTable(const std::string& tableName){
     }
     
     printTable(table->columns, table->rows);
-}
-
-std::string toString(const std::variant<int, std::string>& v) {
-    return std::visit([](auto&& value) -> std::string {
-        using T = std::decay_t<decltype(value)>;
-
-        if constexpr (std::is_same_v<T, std::string>)
-            return value;
-        else
-            return std::to_string(value);
-    }, v);
 }

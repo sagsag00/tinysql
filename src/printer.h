@@ -34,6 +34,4 @@ void printTable(const Table& table);
 // @param tableName The name of the table
 void printTable(const std::string& tableName);
 
-std::string toString(const std::variant<int, std::string>& v);
-
 #endif

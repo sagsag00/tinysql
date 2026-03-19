@@ -16,6 +16,7 @@ Result execute(const ParsedQuery& query){
     if(query.action == "drop"){
         return Result{query.tableName, query.action, deleteFrom(query)};
     }
+    return Result{};
 }
 
 bool create(const ParsedQuery& query){

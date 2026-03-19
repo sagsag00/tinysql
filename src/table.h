@@ -54,7 +54,7 @@ public:
 
     // Returns all columns in a table
     // @param tableName The name of the table
-    const std::vector<Column>* Database::getColumns(const std::string& tableName);
+    const std::vector<Column>* getColumns(const std::string& tableName);
     
     // Adds a row to the table
     // @param tableName The name of the table

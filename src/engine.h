@@ -6,10 +6,12 @@
 #include "parser.h"
 #include "table.h"
 
+using Result = std::variant<std::vector<Row>, bool, std::monostate>;
+
 // Creates a new table using the column definitions in the query
 // Throws std::runtime_error if column definitions are missing
 // @param query The parsed query containing the table name and columns
-void create(ParsedQuery& query);
+std::monostate create(ParsedQuery& query);
 
 // Inserts a new row into the table specified in the query
 // Throws std::runtime_error if values are missing
@@ -37,6 +39,6 @@ bool deleteTable(ParsedQuery& query);
 // Dispatches the parsed query to the appropriate execute function based on the action
 // Throws std::runtime_error for unknown actions or malformed queries
 // @param query The parsed query to execute
-void execute(ParsedQuery& query);
+Result execute(ParsedQuery& query);
 
 #endif

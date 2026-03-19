@@ -1,23 +1,24 @@
 #include "engine.h"
 
-void execute(ParsedQuery& query){
+Result execute(ParsedQuery& query){
     if(query.action == "create"){
-        create(query);
+        return create(query);
     }
     if(query.action == "insert"){
-        insert(query);
+        return insert(query);
     }
     if(query.action == "select"){
-        select(query);
+        return select(query);
     }
     if(query.action == "delete"){
-        deleteFrom(query);
+        return deleteFrom(query);
     }
     if(query.action == "drop"){
-        deleteFrom(query);
+        return deleteFrom(query);
     }
 }
-void create(ParsedQuery& query){
+
+std::monostate create(ParsedQuery& query){
     if (!query.columns.has_value())
         throw std::runtime_error("CREATE TABLE missing column definitions");
     Database::getInstance()->addTable({query.tableName, query.columns.value(), {}});
@@ -33,14 +34,14 @@ bool insert(ParsedQuery& query){
 std::vector<Row> select(ParsedQuery& query){
     if(!query.value.has_value()){
         if(!query.columns.has_value()){
-            // SELECT *
-            Database::getInstance()->select(query.tableName);
-            return;
+            // SELECT * FROM
+            return Database::getInstance()->select(query.tableName);
         }
-        //TODO SELECT COLS
+        // SELECT COLS FROM NAME
+        return Database::getInstance()->select(query.tableName, *query.columns);
     }
-    //TODO SELECT ... WHERE
-    return;
+    if(!query.columnName.has_value()) return {};
+    return Database::getInstance()->select(query.tableName, *query.columnName, *query.value);
 }
 
 bool deleteFrom(ParsedQuery& query){

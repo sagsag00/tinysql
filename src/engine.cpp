@@ -1,37 +1,37 @@
 #include "engine.h"
 
-Result execute(ParsedQuery& query){
+Result execute(const ParsedQuery& query){
     if(query.action == "create"){
-        return create(query);
+        return Result{query.tableName, query.action, create(query)};
     }
     if(query.action == "insert"){
-        return insert(query);
+        return Result{query.tableName, query.action, insert(query)};
     }
     if(query.action == "select"){
-        return select(query);
+        return Result{query.tableName, query.action, select(query)};
     }
     if(query.action == "delete"){
-        return deleteFrom(query);
+        return Result{query.tableName, query.action, deleteFrom(query)};
     }
     if(query.action == "drop"){
-        return deleteFrom(query);
+        return Result{query.tableName, query.action, deleteFrom(query)};
     }
 }
 
-std::monostate create(ParsedQuery& query){
+bool create(const ParsedQuery& query){
     if (!query.columns.has_value())
         throw std::runtime_error("CREATE TABLE missing column definitions");
-    Database::getInstance()->addTable({query.tableName, query.columns.value(), {}});
+    return Database::getInstance()->addTable({query.tableName, query.columns.value(), {}});
 }
 
-bool insert(ParsedQuery& query){
+bool insert(const ParsedQuery& query){
     if(!query.values.has_value())
         throw std::runtime_error("INSERT INTO missing values definitions");
     
     return Database::getInstance()->addRow(query.tableName, Row{*query.values});
 }
 
-std::vector<Row> select(ParsedQuery& query){
+std::vector<Row> select(const ParsedQuery& query){
     if(!query.value.has_value()){
         if(!query.columns.has_value()){
             // SELECT * FROM
@@ -44,7 +44,7 @@ std::vector<Row> select(ParsedQuery& query){
     return Database::getInstance()->select(query.tableName, *query.columnName, *query.value);
 }
 
-bool deleteFrom(ParsedQuery& query){
+bool deleteFrom(const ParsedQuery& query){
     if(!query.value.has_value()){
         throw std::runtime_error("DELETE FROM missing value definitions");
     }
@@ -54,6 +54,6 @@ bool deleteFrom(ParsedQuery& query){
     return Database::getInstance()->deleteFrom(query.tableName, *query.columnName, *query.value);
 }
 
-bool deleteTable(ParsedQuery& query){
+bool deleteTable(const ParsedQuery& query){
     return Database::getInstance()->deleteTable(query.tableName);
 }

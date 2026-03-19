@@ -1,7 +1,7 @@
 #include "parser.h"
 #include <stdexcept>
 
-static const Token& expect(const std::vector<Token>& tokens, size_t& i, Token::Type type){
+static const Token& expect(const std::vector<Token>& tokens, size_t& i, const Token::Type type){
     while(++i < tokens.size() && tokens[i].type == Token::SYMBOL);
 
     if (i>= tokens.size() || tokens[i].type != type)

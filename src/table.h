@@ -37,8 +37,8 @@ private:
     Database(const Database&) = delete;
     Database& operator=(const Database&) = delete;
 
-    std::vector<Row> iterateRows(Table* table, std::vector<int>& colIndices);
-    int getColumnIndex(Table* table, const std::string& columnName);
+    std::vector<Row> iterateRows(const Table* table, const std::vector<int>& colIndices);
+    int getColumnIndex(const Table* table, const std::string& columnName);
     bool compareValue(const Value& a, const Value& b);
 
 public:
@@ -46,12 +46,16 @@ public:
 
     // Adds a table to the database
     // @param table The table object
-    void addTable(const Table& table);
+    bool addTable(const Table& table);
 
     // Returns a table by name
     // @param name The table name
     Table* getTable(const std::string& name);
 
+    // Returns all columns in a table
+    // @param tableName The name of the table
+    const std::vector<Column>* Database::getColumns(const std::string& tableName);
+    
     // Adds a row to the table
     // @param tableName The name of the table
     // @param row The row object

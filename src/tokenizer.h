@@ -16,11 +16,27 @@ struct Token
     std::string value;
 };
 
-bool isKeyword(std::string word);
+// Checks if a word is a part of the keywords
+// @param word The word to check
+bool isKeyword(const std::string word);
+
+// Pushes current token to tokens and clears current token after
+// @param tokens 
+// @param currentToken
 void pushCurrentToken(std::vector<Token>& tokens, std::string& currentToken);
-void pushSymbol(std::vector<Token>& tokens, char ch);
+
+// Pushes symbol to tokens
+// @param tokens
+// @param ch The symbol
+void pushSymbol(std::vector<Token>& tokens, const char ch);
+
+// Reads literal from input and updates i to be after literals
+// @param input
+// @param i
 std::string readLiteral(const std::string& input, size_t& i);
 
+// Tokenizes an input
+// @param input
 std::vector<Token> tokenize(const std::string& input);
 
 #endif

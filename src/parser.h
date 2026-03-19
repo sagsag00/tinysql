@@ -9,8 +9,6 @@
 #include "tokenizer.h"
 #include "table.h"
 
-using Value = std::variant<int, std::string>;
-
 struct ParsedQuery {
     std::string action;
     std::string tableName;
@@ -26,7 +24,7 @@ struct ParsedQuery {
 // @param i The current index, advanced in place
 // @param type The expected token type
 // @return The matched token
-const Token& expect(const std::vector<Token>& tokens, size_t& i, Token::Type type);
+const Token& expect(const std::vector<Token>& tokens, size_t& i, const Token::Type type);
 
 // Checks if the token is a keyword and it matches the keyword name
 // @param t The token to check

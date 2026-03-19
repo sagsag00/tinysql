@@ -1,6 +1,6 @@
 #include "tokenizer.h"
 
-std::vector<Token> tokenize(std::string& input){
+std::vector<Token> tokenize(const std::string& input){
     std::vector<Token> tokens;
     std::string currentToken;
 
@@ -42,11 +42,11 @@ std::string readLiteral(const std::string& input, size_t& i) {
     return literal;
 }
 
-void pushSymbol(std::vector<Token>& tokens, char ch) {
+void pushSymbol(std::vector<Token>& tokens, const char ch) {
     tokens.push_back({Token::SYMBOL, std::string(1, ch)});
 }
 
-bool isKeyword(std::string word){
+bool isKeyword(const std::string word){
     std::string upperWord = word;
     std::transform(upperWord.begin(), upperWord.end(), upperWord.begin(), ::toupper);
 

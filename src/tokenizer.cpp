@@ -61,7 +61,7 @@ std::vector<Token> tokenize(const std::string& input){
         else if(ch == ' '){
             pushCurrentToken(tokens, currentToken);
         }
-        else if(ch == ',' || ch == '(' || ch == ')'){
+        else if(ch == ',' || ch == '(' || ch == ')' || ch == '='){
             pushCurrentToken(tokens, currentToken);
             pushSymbol(tokens, ch);
         }

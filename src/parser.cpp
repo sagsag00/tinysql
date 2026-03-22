@@ -1,4 +1,5 @@
 #include "parser.h"
+#include <iostream>
 #include <stdexcept>
 
 // Advances past any symbol tokens, then checks the next token matches the expected type
@@ -8,12 +9,12 @@
 // @param type The expected token type
 // @return The matched token
 static const Token& expect(const std::vector<Token>& tokens, size_t& i, const Token::Type type){
-    while(++i < tokens.size() && tokens[i].type == Token::SYMBOL);
+    while(i + 1 < tokens.size() && tokens[i + 1].type == Token::SYMBOL) i++;
 
-    if (i>= tokens.size() || tokens[i].type != type)
-        throw std::runtime_error("Unexpected token at position " + std::to_string(i));
-
-    return tokens[i++];
+    if (i + 1 >= tokens.size() || tokens[i + 1].type != type)
+        throw std::runtime_error("Unexpected token at position " + std::to_string(i + 1));
+    
+    return tokens[++i];
 }
 
 // Checks if the token is a keyword and it matches the keyword name
@@ -38,12 +39,15 @@ static Column::Type parseColumnType(const std::string& raw){
 // @param raw The string to parse
 // @return The parsed Value
 static Value parseValue(const std::string& raw){
+    std::string s = raw;
+
+    s.erase(std::remove(s.begin(), s.end(), '\''), s.end());
+    s.erase(std::remove(s.begin(), s.end(), '"'), s.end());
+
     try{
-        return std::stoi(raw);
+        return std::stoi(s);
     } catch (...) {
-        if(raw.size() >= 2 && (raw.front() == '\'' || raw.front() == '"'))
-            return raw.substr(1, raw.size() - 2);
-        return raw;
+        return s;
     }
 }
 
@@ -57,14 +61,17 @@ static std::vector<Column> parseColumnList(const std::vector<Token>& tokens, siz
 
     while(i < tokens.size()){
         const Token& t = tokens[i];
-
         if(t.type == Token::SYMBOL) {i++; continue;}
 
         if(t.type != Token::IDENTIFIER) break;
 
         Column col;
         col.name = t.value;
-        col.type = parseColumnType(expect(tokens, ++i, Token::IDENTIFIER).value);
+
+        std::cout << t.value << std::endl;
+
+        col.type = parseColumnType(expect(tokens, i, Token::IDENTIFIER).value);
+
         columns.push_back(col);
         i++;
     }
@@ -98,14 +105,17 @@ ParsedQuery parse(const std::vector<Token>& tokens, const std::string& action){
     ParsedQuery result;
     result.action = action;
 
-    for(size_t i = 0; i < tokens.size(); i++){
+    size_t i = 0;
+    while(i < tokens.size()){
         const Token& t = tokens[i];
-
-        if(t.type != Token::KEYWORD) continue;
+        if(t.type != Token::KEYWORD){
+            i++;
+            continue;
+        }
 
         if(result.action == "create" && matchKeyword(t, "TABLE")){
             result.tableName = expect(tokens, i, Token::IDENTIFIER).value;
-            i++;  // move past table name into column list
+            i++;
             result.columns = parseColumnList(tokens, i);
         }
         else if(matchKeyword(t, "FROM") || matchKeyword(t, "INTO")){
@@ -117,8 +127,11 @@ ParsedQuery parse(const std::vector<Token>& tokens, const std::string& action){
             result.value = parseValue(expect(tokens, i, Token::LITERAL).value);
         } 
         else if (matchKeyword(t, "VALUES")) {
+            i++;
             result.values = parseValueList(tokens, i);
         }
+
+        i++;
     }
     return result;
 }

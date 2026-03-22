@@ -104,6 +104,8 @@ public:
     // @param row The row to delete
     // @return true if the row was deleted successfully, false otherwise
     bool deleteRow(Table& table, const Row& row);
+
+    void clear() { tables.clear(); };
 };
 
 #endif

@@ -74,6 +74,21 @@ TEST(ParserTest, DeleteFromTable){
     EXPECT_EQ(std::get<std::string>(q.value.value()), "alice");
 }
 
+TEST(ParserTest, DropTable){
+    auto q = tokenizeAndParse("DROP TABLE users", "drop");
+    EXPECT_EQ(q.action, "drop");
+    EXPECT_EQ(q.tableName, "users");
+    EXPECT_FALSE(q.columns.has_value());
+    EXPECT_FALSE(q.values.has_value());
+}
+
+TEST(ParserTest, DropTableNoColumnsOrValues){
+    auto q = tokenizeAndParse("DROP TABLE orders", "drop");
+    EXPECT_EQ(q.tableName, "orders");
+    EXPECT_FALSE(q.columns.has_value());
+    EXPECT_FALSE(q.values.has_value());
+}
+
 TEST(ParserTest, MissingtableNameThrows){
     EXPECT_THROW(tokenizeAndParse("SELECT * FROM", "select"), std::runtime_error);
 }

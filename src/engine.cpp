@@ -1,4 +1,5 @@
 #include "engine.h"
+#include <iostream>
 
 Result execute(const ParsedQuery& query){
     if(query.action == "create"){
@@ -14,7 +15,7 @@ Result execute(const ParsedQuery& query){
         return Result{query.tableName, query.action, deleteFrom(query)};
     }
     if(query.action == "drop"){
-        return Result{query.tableName, query.action, deleteFrom(query)};
+        return Result{query.tableName, query.action, deleteTable(query)};
     }
     return Result{};
 }

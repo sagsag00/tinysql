@@ -1,10 +1,15 @@
 #include "table.h"
 
-Database* Database::getInstance(){
+Database* Database::instance = nullptr;
+Database* Database::getInstance() {
+    if (!instance)
+        instance = new Database();
     return instance;
 }
 
 bool Database::addTable(const Table& table){
+    if (tables.find(table.name) != tables.end())
+        return false;
     tables[table.name] = table;
     return true;
 }
@@ -89,16 +94,15 @@ bool Database::deleteFrom(const std::string& tableName, const std::string& colum
 
     int index = getColumnIndex(table, columnName);
 
-    std::vector<Row> rows = table->rows;
-    size_t originalSize = rows.size();
+    size_t originalSize = table->rows.size();
 
-    rows.erase(
-        std::remove_if(rows.begin(), rows.end(),
+    table->rows.erase(
+        std::remove_if(table->rows.begin(), table->rows.end(),
             [&](const Row& r){ return compareValue(r.values[index], value); }),
-        rows.end()
+        table->rows.end()
     );
 
-    return rows.size() < originalSize;
+    return table->rows.size() < originalSize;
 }
 
 bool Database::deleteTable(const std::string& name){

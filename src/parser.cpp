@@ -68,8 +68,6 @@ static std::vector<Column> parseColumnList(const std::vector<Token>& tokens, siz
         Column col;
         col.name = t.value;
 
-        std::cout << t.value << std::endl;
-
         col.type = parseColumnType(expect(tokens, i, Token::IDENTIFIER).value);
 
         columns.push_back(col);
@@ -113,10 +111,11 @@ ParsedQuery parse(const std::vector<Token>& tokens, const std::string& action){
             continue;
         }
 
-        if(result.action == "create" && matchKeyword(t, "TABLE")){
+        if((result.action == "create" || result.action == "drop") && matchKeyword(t, "TABLE")){
             result.tableName = expect(tokens, i, Token::IDENTIFIER).value;
             i++;
-            result.columns = parseColumnList(tokens, i);
+            if(result.action == "create")
+                result.columns = parseColumnList(tokens, i);
         }
         else if(matchKeyword(t, "FROM") || matchKeyword(t, "INTO")){
             result.tableName = expect(tokens, i, Token::IDENTIFIER).value;

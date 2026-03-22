@@ -16,6 +16,8 @@ struct ParsedQuery {
     std::optional<Value> value;
     std::optional<std::vector<Value>> values;
     std::optional<std::vector<Column>> columns;
+    std::optional<std::string> orderByColumn; 
+    bool orderByDesc = false;
 };
 
 // Parses the token list into a ParsedQuery given the SQL action verb (e.g. "create", "insert", "select")

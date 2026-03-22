@@ -144,3 +144,20 @@ TEST(TokenizerTest, InsertWithLiteral) {
     EXPECT_EQ(tokens[7].type, Token::IDENTIFIER);
     EXPECT_EQ(tokens[8].type, Token::SYMBOL);    
 }
+
+TEST(TokenizerTest, SelectOrderBy){
+    auto tokens = tokenize("SELECT * FROM users WHERE id = '5' ORDER BY name ASC");
+    ASSERT_EQ(tokens.size(), 12u);
+    EXPECT_EQ(tokens[0].type, Token::KEYWORD);
+    EXPECT_EQ(tokens[1].type, Token::IDENTIFIER);
+    EXPECT_EQ(tokens[2].type, Token::KEYWORD);
+    EXPECT_EQ(tokens[3].type, Token::IDENTIFIER);
+    EXPECT_EQ(tokens[4].type, Token::KEYWORD);
+    EXPECT_EQ(tokens[5].type, Token::IDENTIFIER);
+    EXPECT_EQ(tokens[6].type, Token::SYMBOL);
+    EXPECT_EQ(tokens[7].type, Token::LITERAL);
+    EXPECT_EQ(tokens[8].type, Token::KEYWORD);
+    EXPECT_EQ(tokens[9].type, Token::KEYWORD);
+    EXPECT_EQ(tokens[10].type, Token::IDENTIFIER);
+    EXPECT_EQ(tokens[11].type, Token::IDENTIFIER);
+}

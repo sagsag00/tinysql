@@ -1,6 +1,18 @@
 #include "engine.h"
 #include <iostream>
 
+static bool compareVariants(const Value& a, const Value& b, bool desc){
+    if(std::holds_alternative<int>(a) && std::holds_alternative<int>(b)){
+        return desc ? std::get<int>(a) > std::get<int>(b)
+                    : std::get<int>(a) < std::get<int>(b);
+    }
+    if(std::holds_alternative<std::string>(a) && std::holds_alternative<std::string>(b)){
+        return desc ? std::get<std::string>(a) > std::get<std::string>(b)
+                    : std::get<std::string>(a) < std::get<std::string>(b);
+    }
+    throw std::runtime_error("Cannot compare values of different types in ORDER BY");
+}
+
 Result execute(const ParsedQuery& query){
     if(query.action == "create"){
         return Result{query.tableName, query.action, create(query)};
@@ -34,16 +46,34 @@ bool insert(const ParsedQuery& query){
 }
 
 std::vector<Row> select(const ParsedQuery& query){
+    std::vector<Row> rows;
+
     if(!query.value.has_value()){
-        if(!query.columns.has_value()){
-            // SELECT * FROM
-            return Database::getInstance()->select(query.tableName);
-        }
-        // SELECT COLS FROM NAME
-        return Database::getInstance()->select(query.tableName, *query.columns);
+        if(!query.columns.has_value())
+            rows = Database::getInstance()->select(query.tableName);
+        else
+            rows = Database::getInstance()->select(query.tableName, *query.columns);
+    } else {
+        if(!query.columnName.has_value()) return {};
+        rows = Database::getInstance()->select(query.tableName, *query.columnName, *query.value);
     }
-    if(!query.columnName.has_value()) return {};
-    return Database::getInstance()->select(query.tableName, *query.columnName, *query.value);
+
+    if(!query.orderByColumn.has_value()) return rows;
+    
+    const std::vector<Column>* cols = Database::getInstance()->getColumns(query.tableName);
+    if(!cols) return rows;
+
+    int idx = -1;
+    for(size_t i = 0; i < cols->size(); i++){
+        if((*cols)[i].name == *query.orderByColumn) { idx = i; break; }
+    }
+    if(idx != -1){
+        std::sort(rows.begin(), rows.end(), [&](const Row& a, const Row& b){
+            return compareVariants(a.values[idx], b.values[idx], query.orderByDesc);
+        });
+    }
+
+    return rows;
 }
 
 bool deleteFrom(const ParsedQuery& query){

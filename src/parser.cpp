@@ -128,6 +128,15 @@ ParsedQuery parse(const std::vector<Token>& tokens, const std::string& action){
         else if (matchKeyword(t, "VALUES")) {
             i++;
             result.values = parseValueList(tokens, i);
+        } 
+        else if(matchKeyword(t, "ORDER")){
+            if(i + 1 < tokens.size() && matchKeyword(tokens[i + 1], "BY")) i++;
+            result.orderByColumn = expect(tokens, i, Token::IDENTIFIER).value;
+
+            if(i + 1 < tokens.size() && tokens[i + 1].type == Token::IDENTIFIER){
+                if(tokens[i + 1].value == "DESC") { result.orderByDesc = true;  i++; }
+                if(tokens[i + 1].value == "ASC")  { result.orderByDesc = false; i++; }
+            }
         }
 
         i++;

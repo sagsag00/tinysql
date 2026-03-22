@@ -19,7 +19,7 @@ void formatResult(const bool& success, const std::string& tableName, const std::
           << std::endl;
 }
 
-void formatResult(const std::vector<Row>& rows, const std::string& tableName, const std::string& action){
+void formatResult(const std::vector<Row>& rows, const std::string& tableName){
     const std::vector<Column>* columns = Database::getInstance()->getColumns(tableName);
 
     if(!columns){
@@ -27,6 +27,7 @@ void formatResult(const std::vector<Row>& rows, const std::string& tableName, co
         return;
     }
 
+    std::cout << "Table: " << tableName << "\n";
     printTable(*columns, rows);
 }
 

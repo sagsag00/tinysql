@@ -52,6 +52,8 @@ public:
     // @param name The table name
     Table* getTable(const std::string& name);
 
+    std::vector<Table> getTables();
+
     // Returns all columns in a table
     // @param tableName The name of the table
     const std::vector<Column>* getColumns(const std::string& tableName);

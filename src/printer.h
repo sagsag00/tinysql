@@ -17,7 +17,7 @@ void formatResult(const bool& success, const std::string& tableName, const std::
 // @param rows The table of data to print
 // @param tableName The name of the table that was executed on
 // @param action The action taken (ie SELECT, ORDER BY, ...)
-void formatResult(const std::vector<Row>& rows, const std::string& tableName, const std::string& action);
+void formatResult(const std::vector<Row>& rows, const std::string& tableName);
 
 // Prints a table of data
 // @param columns The columns of the table

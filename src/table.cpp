@@ -21,6 +21,14 @@ Table* Database::getTable(const std::string& name){
     return &it->second;
 }
 
+std::vector<Table> Database::getTables(){
+    std::vector<Table> result;
+    result.reserve(tables.size());
+    for(const auto& pair : tables){
+        result.push_back(pair.second);
+    }
+    return result;
+}
 
 const std::vector<Column>* Database::getColumns(const std::string& tableName){
     const Table* table = Database::getTable(tableName);
@@ -33,6 +41,17 @@ bool Database::addRow(const std::string& tableName, const Row& row){
     if (!table) return false;
 
     if(row.values.size() != table->columns.size()) return false;
+
+    for(size_t i = 0; i < row.values.size(); i++){
+        const Column& col = table->columns[i];
+        const Value& val = row.values[i];
+
+        if(col.type == Column::Type::INTEGER && !std::holds_alternative<int>(val))
+            throw std::runtime_error("Type mismatch: expected INTEGER for column '" + col.name + "'");
+
+        if(col.type == Column::Type::TEXT && !std::holds_alternative<std::string>(val))
+            throw std::runtime_error("Type mismatch: expected TEXT for column '" + col.name + "'");
+    }
 
     table->rows.push_back(row);
     return true;

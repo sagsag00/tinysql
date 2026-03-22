@@ -54,6 +54,14 @@ TEST_F(EngineTest, InsertSingleValue){
     EXPECT_TRUE(std::get<bool>(r.result));
 }
 
+TEST_F(EngineTest, InsertWrongTypeMismatch){
+    executeQuery("CREATE TABLE items (id INTEGER)", "create");
+    EXPECT_THROW(
+        executeQuery("INSERT INTO items VALUES('hello')", "insert"),
+        std::runtime_error
+    );
+}
+
 TEST_F(EngineTest, InsertMissingValuesThrows){
     executeQuery("CREATE TABLE users (id INTEGER)", "create");
     ParsedQuery q;

@@ -100,6 +100,38 @@ static std::vector<Value> parseValueList(const std::vector<Token>& tokens, size_
     return values;
 }
 
+static void parseSelect(const std::vector<Token>& tokens, size_t& i, ParsedQuery& result){
+    // handle SELECT *
+    if(tokens[i].type == Token::IDENTIFIER && tokens[i].value == "*"){
+        result.columns = std::nullopt;
+        i++;
+        return;
+    } 
+    result.columns = parseColumnList(tokens, i, false);
+}
+
+static void parseWhere(const std::vector<Token>& tokens, size_t& i, ParsedQuery& result) {
+    result.whereColumn = expect(tokens, i, Token::IDENTIFIER).value;
+    while(i + 1 < tokens.size() && tokens[i + 1].type == Token::SYMBOL) i++;
+    result.whereValue = parseValue(expect(tokens, i, Token::LITERAL).value);
+}
+
+static void parseOrder(const std::vector<Token>& tokens, size_t& i, ParsedQuery& result){
+    if(i + 1 < tokens.size() && matchKeyword(tokens[i + 1], "BY")) i++;
+    result.column = expect(tokens, i, Token::IDENTIFIER).value;
+
+    if(i + 1 < tokens.size() && tokens[i + 1].type == Token::IDENTIFIER){
+        if(tokens[i + 1].value == "DESC") { result.orderByDesc = true;  i++; }
+        else if(tokens[i + 1].value == "ASC")  { result.orderByDesc = false; i++; }
+    }
+}
+
+static void parseSet(const std::vector<Token>& tokens, size_t& i, ParsedQuery& result){
+    result.column = expect(tokens, i, Token::IDENTIFIER).value;
+    while(i + 1 < tokens.size() && tokens[i + 1].type == Token::SYMBOL) i++;
+    result.value = parseValue(expect(tokens, i, Token::LITERAL).value);
+}
+
 ParsedQuery parse(const std::vector<Token>& tokens, const std::string& action){
     ParsedQuery result;
     result.action = action;
@@ -120,42 +152,24 @@ ParsedQuery parse(const std::vector<Token>& tokens, const std::string& action){
         } 
         else if(result.action == "select" && matchKeyword(t, "SELECT")){
             i++; 
-
-            // handle SELECT *
-            if(tokens[i].type == Token::IDENTIFIER && tokens[i].value == "*"){
-                result.columns = std::nullopt;
-                i++;
-                continue;
-            } else {
-                result.columns = parseColumnList(tokens, i, false);
-                continue;
-            }
+            parseSelect(tokens, i, result);
+            continue;
         }
         else if(matchKeyword(t, "FROM") || matchKeyword(t, "INTO") || matchKeyword(t, "UPDATE")){
             result.tableName = expect(tokens, i, Token::IDENTIFIER).value;
         }
         else if (matchKeyword(t, "WHERE")){
-            result.whereColumn = expect(tokens, i, Token::IDENTIFIER).value;
-            while(i + 1 < tokens.size() && tokens[i + 1].type == Token::SYMBOL) i++;
-            result.whereValue = parseValue(expect(tokens, i, Token::LITERAL).value);
+            parseWhere(tokens, i, result);
         } 
         else if (matchKeyword(t, "VALUES")) {
             i++;
             result.values = parseValueList(tokens, i);
         } 
         else if(matchKeyword(t, "ORDER")){
-            if(i + 1 < tokens.size() && matchKeyword(tokens[i + 1], "BY")) i++;
-            result.column = expect(tokens, i, Token::IDENTIFIER).value;
-
-            if(i + 1 < tokens.size() && tokens[i + 1].type == Token::IDENTIFIER){
-                if(tokens[i + 1].value == "DESC") { result.orderByDesc = true;  i++; }
-                else if(tokens[i + 1].value == "ASC")  { result.orderByDesc = false; i++; }
-            }
+            parseOrder(tokens, i, result);
         } 
         else if(matchKeyword(t, "SET")){
-            result.column = expect(tokens, i, Token::IDENTIFIER).value;
-            while(i + 1 < tokens.size() && tokens[i + 1].type == Token::SYMBOL) i++;
-            result.value = parseValue(expect(tokens, i, Token::LITERAL).value);
+            parseSet(tokens, i, result);
         }
 
         i++;

@@ -174,7 +174,39 @@ TEST_F(EngineTest, DropTable){
     EXPECT_EQ(r.action, "drop");
     EXPECT_TRUE(std::get<bool>(r.result));
 }
- 
+
+TEST_F(EngineTest, OrderByInt){
+    executeQuery("CREATE TABLE users (id INTEGER, name TEXT)", "create");
+    executeQuery("INSERT INTO users VALUES ('1', \"alice\")", "insert");
+    executeQuery("INSERT INTO users VALUES ('2', \"bob\")", "insert");
+    executeQuery("INSERT INTO users VALUES ('4', \"charles\")", "insert");
+    executeQuery("INSERT INTO users VALUES ('3', \"dave\")", "insert");
+    auto r = executeQuery("SELECT * FROM users ORDER BY id ASC", "select");
+    EXPECT_EQ(r.tableName, "users");
+    EXPECT_EQ(r.action, "select");
+    std::vector v = std::get<std::vector<Row>>(r.result);
+    EXPECT_EQ(std::get<int>(v[0].values[0]), 1);
+    EXPECT_EQ(std::get<int>(v[1].values[0]), 2);
+    EXPECT_EQ(std::get<int>(v[2].values[0]), 3);
+    EXPECT_EQ(std::get<int>(v[3].values[0]), 4);
+}
+
+TEST_F(EngineTest, OrderByString){
+    executeQuery("CREATE TABLE users (id INTEGER, name TEXT)", "create");
+    executeQuery("INSERT INTO users VALUES ('1', \"alice\")", "insert");
+    executeQuery("INSERT INTO users VALUES ('2', \"bob\")", "insert");
+    executeQuery("INSERT INTO users VALUES ('3', \"dave\")", "insert");
+    executeQuery("INSERT INTO users VALUES ('4', \"charles\")", "insert");
+    auto r = executeQuery("SELECT * FROM users ORDER BY name ASC", "select");
+    EXPECT_EQ(r.tableName, "users");
+    EXPECT_EQ(r.action, "select");
+    std::vector<Row> v = std::get<std::vector<Row>>(r.result);
+    EXPECT_EQ(std::get<std::string>(v[0].values[1]), "alice");
+    EXPECT_EQ(std::get<std::string>(v[1].values[1]), "bob");
+    EXPECT_EQ(std::get<std::string>(v[2].values[1]), "charles");
+    EXPECT_EQ(std::get<std::string>(v[3].values[1]), "dave");
+}
+    
 TEST_F(EngineTest, DropNonExistingTableReturnsFalse){
     auto r = executeQuery("DROP TABLE nonexistent", "drop");
     EXPECT_FALSE(std::get<bool>(r.result));

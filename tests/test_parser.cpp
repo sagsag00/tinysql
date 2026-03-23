@@ -27,6 +27,26 @@ TEST(ParserTest, SelectWithWhereInt){
     EXPECT_EQ(std::get<int>(q.value.value()), 42);
 }
 
+TEST(ParserTest, OrderBy){
+    auto q = tokenizeAndParse("SELECT * FROM users ORDER BY name DESC", "select");
+    EXPECT_EQ(q.tableName, "users");
+    EXPECT_TRUE(q.orderByColumn.has_value());
+    EXPECT_EQ(q.orderByColumn, "name");
+    EXPECT_TRUE(q.orderByDesc);
+}
+
+TEST(ParserTest, OrderByWhere){
+    auto q = tokenizeAndParse("SELECT * FROM users WHERE id = '2' ORDER BY name DESC", "select");
+    EXPECT_EQ(q.tableName, "users");
+    ASSERT_TRUE(q.columnName.has_value());
+    EXPECT_EQ(q.columnName.value(), "id");
+    ASSERT_TRUE(q.value.has_value());
+    EXPECT_EQ(std::get<int>(q.value.value()), 2);
+    EXPECT_TRUE(q.orderByColumn.has_value());
+    EXPECT_EQ(q.orderByColumn, "name");
+    EXPECT_TRUE(q.orderByDesc);
+}
+
 TEST(ParserTest, InsertIntoTable){
     auto q = tokenizeAndParse("INSERT INTO users VALUES('alice', '30')", "insert");
     EXPECT_EQ(q.action, "insert");

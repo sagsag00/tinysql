@@ -134,10 +134,8 @@ ParsedQuery parse(const std::vector<Token>& tokens, const std::string& action){
             result.orderByColumn = expect(tokens, i, Token::IDENTIFIER).value;
 
             if(i + 1 < tokens.size() && tokens[i + 1].type == Token::IDENTIFIER){
-                std::cout << "TEST1" << std::endl;
                 if(tokens[i + 1].value == "DESC") { result.orderByDesc = true;  i++; }
                 else if(tokens[i + 1].value == "ASC")  { result.orderByDesc = false; i++; }
-                std::cout << "TEST2" << std::endl;
             }
         }
 

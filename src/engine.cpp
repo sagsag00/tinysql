@@ -69,6 +69,7 @@ std::vector<Row> select(const ParsedQuery& query){
     }
     if(idx != -1){
         std::sort(rows.begin(), rows.end(), [&](const Row& a, const Row& b){
+            std::cout << "a: " << a.values.size() << " b: " << b.values.size() << " idx: " << idx << std::endl;
             return compareVariants(a.values[idx], b.values[idx], query.orderByDesc);
         });
     }

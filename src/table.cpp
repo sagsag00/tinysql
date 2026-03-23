@@ -56,6 +56,28 @@ bool Database::addRow(const std::string& tableName, const Row& row){
     table->rows.push_back(row);
     return true;
 }
+bool Database::update(const std::string& tableName,
+                      const std::string& columnName,
+                      const Value& newValue,
+                      const std::string& whereColumn,
+                      const Value& whereValue)
+{
+    Table* table = getTable(tableName);
+    if (!table) return false;
+
+    int updateIndex = getColumnIndex(table, columnName);
+    int whereIndex = getColumnIndex(table, whereColumn);
+
+    bool updated = false;
+    for(Row& row : table->rows){
+        if(compareValue(row.values[whereIndex], whereValue)){
+            row.values[updateIndex] = newValue;
+            updated = true;
+        }
+    }
+
+    return updated;
+}
 
 std::vector<Row> Database::select(const std::string& tableName){
     Table* table = getTable(tableName);

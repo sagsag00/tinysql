@@ -12,11 +12,12 @@
 struct ParsedQuery {
     std::string action;
     std::string tableName;
-    std::optional<std::string> columnName;
-    std::optional<Value> value;
+    std::optional<std::string> whereColumn;
+    std::optional<Value> whereValue;
     std::optional<std::vector<Value>> values;
     std::optional<std::vector<Column>> columns;
-    std::optional<std::string> orderByColumn; 
+    std::optional<std::string> column; 
+    std::optional<Value> value;
     bool orderByDesc = false;
 };
 

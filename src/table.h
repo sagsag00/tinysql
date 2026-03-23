@@ -64,6 +64,18 @@ public:
     // @return true if the row was added successfully, false otherwise
     bool addRow(const std::string& tableName, const Row& row);
 
+    // Updates a column 
+    // @param tableName The name of the table
+    // @param columnName The name of the column to change
+    // @param newValue The new value
+    // @param whereColumn The column to sort by
+    // @param whereValue The value to sort by
+    bool update(const std::string& tableName,
+            const std::string& columnName,
+            const Value& newValue,
+            const std::string& whereColumn,
+            const Value& whereValue);
+
     // Implementation of SELECT * FROM <name>
     // @param tableName The name of the table you want to select from
     // @return All the rows in the table

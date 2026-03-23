@@ -1,7 +1,7 @@
 #include "tokenizer.h"
 
 static const std::unordered_set<std::string> keywords = {
-    "CREATE", "TABLE", "INSERT", "INTO", "SELECT", "FROM", "WHERE", "DELETE", "DROP", "VALUES", "ORDER", "BY"
+    "CREATE", "TABLE", "INSERT", "INTO", "SELECT", "FROM", "WHERE", "DELETE", "DROP", "VALUES", "ORDER", "BY", "UPDATE", "SET"
 };
 
 // Reads literal from input and updates i to be after literals

@@ -53,6 +53,16 @@ int main(){
 
         try {
             std::string action = extractAction(input);
+
+            static const std::unordered_set<std::string> validActions = {
+                "select", "insert", "update", "delete", "create", "drop"
+            };
+
+            if (validActions.find(action) == validActions.end()) {
+                std::cout << "Error: Unknown command '" << action << "'\n";
+                continue;
+            }
+
             std::vector<Token> tokens = tokenize(input);
             ParsedQuery query = parse(tokens, action);
             Result result = execute(query);

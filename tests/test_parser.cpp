@@ -15,35 +15,35 @@ TEST(ParserTest, SelectAllFromTable){
 TEST(ParserTest, SelectWithWhere){
     auto q = tokenizeAndParse("SELECT * FROM users WHERE name = 'alice'", "select");
     EXPECT_EQ(q.tableName, "users");
-    ASSERT_TRUE(q.columnName.has_value());
-    EXPECT_EQ(q.columnName.value(), "name");
-    ASSERT_TRUE(q.value.has_value());
-    EXPECT_EQ(std::get<std::string>(q.value.value()), "alice");
+    ASSERT_TRUE(q.whereColumn.has_value());
+    EXPECT_EQ(q.whereColumn.value(), "name");
+    ASSERT_TRUE(q.whereValue.has_value());
+    EXPECT_EQ(std::get<std::string>(q.whereValue.value()), "alice");
 }
 
 TEST(ParserTest, SelectWithWhereInt){
     auto q = tokenizeAndParse("SELECT * FROM users WHERE id = '42'", "select");
-    ASSERT_TRUE(q.value.has_value());
-    EXPECT_EQ(std::get<int>(q.value.value()), 42);
+    ASSERT_TRUE(q.whereValue.has_value());
+    EXPECT_EQ(std::get<int>(q.whereValue.value()), 42);
 }
 
 TEST(ParserTest, OrderBy){
     auto q = tokenizeAndParse("SELECT * FROM users ORDER BY name DESC", "select");
     EXPECT_EQ(q.tableName, "users");
-    EXPECT_TRUE(q.orderByColumn.has_value());
-    EXPECT_EQ(q.orderByColumn, "name");
+    EXPECT_TRUE(q.column.has_value());
+    EXPECT_EQ(q.column, "name");
     EXPECT_TRUE(q.orderByDesc);
 }
 
 TEST(ParserTest, OrderByWhere){
     auto q = tokenizeAndParse("SELECT * FROM users WHERE id = '2' ORDER BY name DESC", "select");
     EXPECT_EQ(q.tableName, "users");
-    ASSERT_TRUE(q.columnName.has_value());
-    EXPECT_EQ(q.columnName.value(), "id");
-    ASSERT_TRUE(q.value.has_value());
-    EXPECT_EQ(std::get<int>(q.value.value()), 2);
-    EXPECT_TRUE(q.orderByColumn.has_value());
-    EXPECT_EQ(q.orderByColumn, "name");
+    ASSERT_TRUE(q.whereColumn.has_value());
+    EXPECT_EQ(q.whereColumn.value(), "id");
+    ASSERT_TRUE(q.whereValue.has_value());
+    EXPECT_EQ(std::get<int>(q.whereValue.value()), 2);
+    EXPECT_TRUE(q.column.has_value());
+    EXPECT_EQ(q.column, "name");
     EXPECT_TRUE(q.orderByDesc);
 }
 
@@ -88,10 +88,10 @@ TEST(ParserTest, DeleteFromTable){
     auto q = tokenizeAndParse("DELETE FROM users WHERE name = 'alice'", "delete");
     EXPECT_EQ(q.action, "delete");
     EXPECT_EQ(q.tableName, "users");
-    ASSERT_TRUE(q.columnName.has_value());
-    EXPECT_EQ(q.columnName.value(), "name");
-    ASSERT_TRUE(q.value.has_value());
-    EXPECT_EQ(std::get<std::string>(q.value.value()), "alice");
+    ASSERT_TRUE(q.whereColumn.has_value());
+    EXPECT_EQ(q.whereColumn.value(), "name");
+    ASSERT_TRUE(q.whereValue.has_value());
+    EXPECT_EQ(std::get<std::string>(q.whereValue.value()), "alice");
 }
 
 TEST(ParserTest, DropTable){

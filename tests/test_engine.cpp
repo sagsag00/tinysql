@@ -152,17 +152,17 @@ TEST_F(EngineTest, DeleteMissingValueThrows){
     ParsedQuery q;
     q.action     = "delete";
     q.tableName  = "users";
-    q.columnName = "id";
+    q.whereColumn = "id";
 
     EXPECT_THROW(execute(q), std::runtime_error);
 }
  
-TEST_F(EngineTest, DeleteMissingColumnNameThrows){
+TEST_F(EngineTest, DeleteMissingwhereColumnThrows){
     executeQuery("CREATE TABLE users (id INTEGER)", "create");
     ParsedQuery q;
     q.action    = "delete";
     q.tableName = "users";
-    q.value     = std::string{"1"};
+    q.whereValue     = std::string{"1"};
 
     EXPECT_THROW(execute(q), std::runtime_error);
 }

@@ -37,6 +37,9 @@ Result execute(const ParsedQuery& query){
     if(query.action == "drop"){
         return Result{query.tableName, query.action, deleteTable(query)};
     }
+    if(query.action == "update"){
+        return Result{query.tableName, query.action, update(query)};
+    }
     return Result{};
 }
 
@@ -53,28 +56,48 @@ bool insert(const ParsedQuery& query){
     return Database::getInstance()->addRow(query.tableName, Row{*query.values});
 }
 
+bool update(const ParsedQuery& query){
+    if(
+        !query.column.has_value() ||
+        !query.value.has_value() ||
+        !query.whereValue.has_value() ||
+        !query.whereColumn.has_value() 
+    )
+        throw std::runtime_error("UPDATE missing value or column");
+
+    
+
+    return Database::getInstance()->update(
+        query.tableName,
+        *query.column,
+        *query.value,
+        *query.whereColumn,
+        *query.whereValue
+    );
+}
+
 std::vector<Row> select(const ParsedQuery& query){
     std::vector<Row> rows;
 
-    if(!query.value.has_value()){
+    if(!query.whereValue.has_value()){
         if(!query.columns.has_value()){
             rows = Database::getInstance()->select(query.tableName);
         }
         else
             rows = Database::getInstance()->select(query.tableName, *query.columns);
     } else {
-        if(!query.columnName.has_value()) return {};
-        rows = Database::getInstance()->select(query.tableName, *query.columnName, *query.value);
+        if(!query.whereColumn.has_value()) return {};
+        rows = Database::getInstance()->select(query.tableName, *query.whereColumn, *query.whereValue);
     }
 
-    if(!query.orderByColumn.has_value()) return rows;
+    if(!query.column.has_value()) return rows;
     
     const std::vector<Column>* cols = Database::getInstance()->getColumns(query.tableName);
     if(!cols) return rows;
 
     int idx = -1;
     for(size_t i = 0; i < cols->size(); i++){
-        if((*cols)[i].name == *query.orderByColumn) { idx = i; break; }
+        if((*cols)[i].name == *query.column) { idx = i; break; }
     }
     if(idx != -1){
         std::sort(rows.begin(), rows.end(), [&](const Row& a, const Row& b){
@@ -86,13 +109,13 @@ std::vector<Row> select(const ParsedQuery& query){
 }
 
 bool deleteFrom(const ParsedQuery& query){
-    if(!query.value.has_value()){
+    if(!query.whereValue.has_value()){
         throw std::runtime_error("DELETE FROM missing value definitions");
     }
-    if(!query.columnName.has_value()){
+    if(!query.whereColumn.has_value()){
         throw std::runtime_error("DELETE FROM missing column name definitions");
     }
-    return Database::getInstance()->deleteFrom(query.tableName, *query.columnName, *query.value);
+    return Database::getInstance()->deleteFrom(query.tableName, *query.whereColumn, *query.whereValue);
 }
 
 bool deleteTable(const ParsedQuery& query){

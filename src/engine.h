@@ -26,6 +26,11 @@ bool create(const ParsedQuery& query);
 // @return true if the row was inserted successfully
 bool insert(const ParsedQuery& query);
 
+// Updates a col with a specific value to a new value
+// @param query The parsed query containing the table name and values
+// @return true if the column was updated successfully
+bool update(const ParsedQuery& query);
+
 // Selects rows from the table specified in the query
 // Returns all rows if no WHERE clause is present, otherwise filters by the column and value
 // @param query The parsed query containing the table name and optional filter

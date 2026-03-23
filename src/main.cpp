@@ -5,6 +5,7 @@
 #include "parser.h"
 #include "tokenizer.h"
 #include "printer.h"
+#include "storage.h"
 
 static std::string extractAction(const std::string& input){
     std::string first;
@@ -31,6 +32,25 @@ static void printAllTables(){
     }
 }
 
+static void save(std::string& input){
+    auto [path, oneFile] = parseStorageArgs(input.size() > 6 ? input.substr(6) : "");
+
+    if (!oneFile) {
+        std::error_code ec;
+        std::filesystem::create_directories(path, ec);
+        if (ec) throw std::runtime_error("Cannot create directory: " + path);
+    }
+
+    saveTables(Database::getInstance()->getTables(), path, oneFile);
+    std::cout << "Saved to " << path << (oneFile ? "" : "/") << "\n";
+}
+
+static void load(std::string& input){
+    auto [path, oneFile] = parseStorageArgs(input.size() > 6 ? input.substr(6) : "");
+    loadTables(path, oneFile);
+    std::cout << "Loaded from " << path << (oneFile ? "" : "/") << "\n";
+}
+
 int main(){
     std::cout << "TinySQL REPL - type .quit to quit" << std::endl;
     std::cout << "------------------------------------\n";
@@ -47,6 +67,14 @@ int main(){
         if(input == ".quit") break;
         if(input == ".tables") {
             printAllTables();
+            continue;
+        }
+        if (input.substr(0, 5) == ".save") {
+            save(input);
+            continue;
+        }
+        if (input.substr(0, 5) == ".load") {
+            load(input);
             continue;
         }
         if(input.empty()) continue;

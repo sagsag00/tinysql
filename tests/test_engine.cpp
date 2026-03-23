@@ -119,6 +119,16 @@ TEST_F(EngineTest, SelectWhereNoMatchReturnsEmpty){
     EXPECT_TRUE(rows.empty());
 }
 
+TEST_F(EngineTest, UpdateData){
+    executeQuery("CREATE TABLE users (id INTEGER, name TEXT)", "create");
+    executeQuery("INSERT INTO users VALUES('1', 'alice')", "insert");
+    auto r = executeQuery("UPDATE users SET id = '2' WHERE id = '1'", "update");
+    EXPECT_TRUE(std::get<bool>(r.result));
+    auto rows = std::get<std::vector<Row>>(
+        executeQuery("SELECT * FROM users", "select").result);
+    EXPECT_EQ(std::get<int>(rows[0].values[0]), 2u);
+}
+
 TEST_F(EngineTest, DeleteFromTable){
     executeQuery("CREATE TABLE users (id INTEGER, name TEXT)", "create");
     executeQuery("INSERT INTO users VALUES('1', 'alice')", "insert");

@@ -18,8 +18,14 @@ add_library(tiny_sql_lib
     src/engine.cpp
     src/table.cpp
     src/printer.cpp
+    src/storage.cpp
 )
 target_include_directories(tiny_sql_lib PUBLIC src/)
+
+if(MINGW)
+    target_link_libraries(tiny_sql_lib PUBLIC stdc++fs)
+    target_link_options(tiny_sql_lib PUBLIC -static -static-libgcc -static-libstdc++)
+endif()
 
 # Main exe
 add_executable(tiny_sql src/main.cpp)

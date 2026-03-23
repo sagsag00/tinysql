@@ -52,6 +52,7 @@ void printTable(const std::vector<Column>& columns, const std::vector<Row>& rows
         }
         std::cout << "\n";
     }
+    std::cout << "\n";
 }
 
 void printTable(const Table& table){

@@ -56,7 +56,7 @@ static Value parseValue(const std::string& raw){
 // @param tokens The token list
 // @param i The current index, advanced in place
 // @return A vector of all the parsed columns
-static std::vector<Column> parseColumnList(const std::vector<Token>& tokens, size_t& i){
+static std::vector<Column> parseColumnList(const std::vector<Token>& tokens, size_t& i, bool hasType){
     std::vector<Column> columns;
 
     while(i < tokens.size()){
@@ -68,7 +68,8 @@ static std::vector<Column> parseColumnList(const std::vector<Token>& tokens, siz
         Column col;
         col.name = t.value;
 
-        col.type = parseColumnType(expect(tokens, i, Token::IDENTIFIER).value);
+        if(hasType)
+            col.type = parseColumnType(expect(tokens, i, Token::IDENTIFIER).value);
 
         columns.push_back(col);
         i++;
@@ -115,7 +116,20 @@ ParsedQuery parse(const std::vector<Token>& tokens, const std::string& action){
             result.tableName = expect(tokens, i, Token::IDENTIFIER).value;
             i++;
             if(result.action == "create")
-                result.columns = parseColumnList(tokens, i);
+                result.columns = parseColumnList(tokens, i, true);
+        } 
+        else if(result.action == "select" && matchKeyword(t, "SELECT")){
+            i++; 
+
+            // handle SELECT *
+            if(tokens[i].type == Token::IDENTIFIER && tokens[i].value == "*"){
+                result.columns = std::nullopt;
+                i++;
+                continue;
+            } else {
+                result.columns = parseColumnList(tokens, i, false);
+                continue;
+            }
         }
         else if(matchKeyword(t, "FROM") || matchKeyword(t, "INTO")){
             result.tableName = expect(tokens, i, Token::IDENTIFIER).value;

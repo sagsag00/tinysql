@@ -21,7 +21,15 @@ Result execute(const ParsedQuery& query){
         return Result{query.tableName, query.action, insert(query)};
     }
     if(query.action == "select"){
-        return Result{query.tableName, query.action, select(query)};
+        std::vector<Column> columns;
+        if (query.columns.has_value()) {
+            columns = *query.columns;
+        } else {
+            Table* table = Database::getInstance()->getTable(query.tableName);
+            if (table != nullptr)
+                columns = table->columns;
+        }
+        return Result{query.tableName, query.action, select(query), columns};
     }
     if(query.action == "delete"){
         return Result{query.tableName, query.action, deleteFrom(query)};
@@ -49,8 +57,9 @@ std::vector<Row> select(const ParsedQuery& query){
     std::vector<Row> rows;
 
     if(!query.value.has_value()){
-        if(!query.columns.has_value())
+        if(!query.columns.has_value()){
             rows = Database::getInstance()->select(query.tableName);
+        }
         else
             rows = Database::getInstance()->select(query.tableName, *query.columns);
     } else {

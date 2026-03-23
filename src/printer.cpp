@@ -19,16 +19,8 @@ void formatResult(const bool& success, const std::string& tableName, const std::
           << std::endl;
 }
 
-void formatResult(const std::vector<Row>& rows, const std::string& tableName){
-    const std::vector<Column>* columns = Database::getInstance()->getColumns(tableName);
-
-    if(!columns){
-        std::cout << "Table not found\n";
-        return;
-    }
-
-    std::cout << "Table: " << tableName << "\n";
-    printTable(*columns, rows);
+void formatResult(const std::vector<Row>& rows, const std::vector<Column>& columns){
+    printTable(columns, rows);
 }
 
 void printTable(const std::vector<Column>& columns, const std::vector<Row>& rows){

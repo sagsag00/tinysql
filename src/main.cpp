@@ -21,13 +21,13 @@ static void printResult(const Result& r){
         if constexpr (std::is_same_v<T, bool>)
             formatResult(val, r.tableName, r.action); // val is bool
         else
-            formatResult(val, r.tableName); // val is std::vector<Row>
+            formatResult(val, *r.columns); // val is std::vector<Row>
     }, r.result);
 }
 
 static void printAllTables(){
     for(Table table : Database::getInstance()->getTables()){
-        formatResult(table.rows, table.name);
+        formatResult(table.rows, table.columns);
     }
 }
 

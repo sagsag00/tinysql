@@ -11,6 +11,7 @@ struct Result
     std::string tableName;
     std::string action;
     std::variant<std::vector<Row>, bool> result;
+    std::optional<std::vector<Column>> columns;
 };
 
 

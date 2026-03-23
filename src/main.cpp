@@ -57,29 +57,30 @@ int main(){
 
     std::string input;
     while(true){
-        std::cout << "> ";
-        if(!std::getline(std::cin, input)) break;
+        try{
+            std::cout << "> ";
+            if(!std::getline(std::cin, input)) break;
 
-        size_t start = input.find_first_not_of(" \t");
-        if(start == std::string::npos) continue;
-        input = input.substr(start);
+            size_t start = input.find_first_not_of(" \t");
+            if(start == std::string::npos) continue;
+            input = input.substr(start);
 
-        if(input == ".quit") break;
-        if(input == ".tables") {
-            printAllTables();
-            continue;
-        }
-        if (input.substr(0, 5) == ".save") {
-            save(input);
-            continue;
-        }
-        if (input.substr(0, 5) == ".load") {
-            load(input);
-            continue;
-        }
-        if(input.empty()) continue;
+            if(input == ".quit") break;
+            if(input == ".tables") {
+                printAllTables();
+                continue;
+            }
+            if (input.substr(0, 5) == ".save") {
+                save(input);
+                continue;
+            }
+            if (input.substr(0, 5) == ".load") {
+                load(input);
+                continue;
+            }
+            if(input.empty()) continue;
 
-        try {
+
             std::string action = extractAction(input);
 
             static const std::unordered_set<std::string> validActions = {

@@ -24,7 +24,10 @@ A lightweight SQL REPL built in C++17. Run SQL queries interactively, persist yo
 ```bash
 git clone https://github.com/you/tinysql.git
 cd tinysql
-cmake --build build
+mkdir build
+cd build
+cmake ..
+cmake --build .
 ```
  
 **Run tests:**

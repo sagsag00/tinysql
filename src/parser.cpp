@@ -1,6 +1,4 @@
 #include "parser.h"
-#include <iostream>
-#include <stdexcept>
 
 // Advances past any symbol tokens, then checks the next token matches the expected type
 // Throws std::runtime_error if the token is missing or the type doesn't match
@@ -111,8 +109,56 @@ static void parseSelect(const std::vector<Token>& tokens, size_t& i, ParsedQuery
 }
 
 static void parseWhere(const std::vector<Token>& tokens, size_t& i, ParsedQuery& result) {
+    // Check for not before the column name
+    if(i + 1 < tokens.size() && matchKeyword(tokens[i + 1], "NOT")){
+        result.whereNot = true;
+        i++;
+    }
+
     result.whereColumn = expect(tokens, i, Token::IDENTIFIER).value;
-    while(i + 1 < tokens.size() && tokens[i + 1].type == Token::SYMBOL) i++;
+
+    // Check for not after the column name
+    if(i + 1 < tokens.size() && matchKeyword(tokens[i + 1], "NOT")){
+        result.whereNot = true;
+        i++;
+    }
+
+    while(i + 1 < tokens.size() && tokens[i + 1].type == Token::SYMBOL){
+        i++;
+        std::string sym = tokens[i].value;
+        if(sym == "=" || sym == "!=" || sym == "<>" || sym == ">" || sym == "<" || sym == ">=" || sym == "<="){
+            result.whereOperator = sym;
+            break;
+        }
+    }
+
+    // IN
+    if(i + 1 < tokens.size() && matchKeyword(tokens[i + 1], "IN")){
+        i++;
+        i++; // skip '('
+        result.whereInValues = parseValueList(tokens, i);
+        return;
+    }
+
+    // BETWEEN
+    if(i + 1 < tokens.size() && matchKeyword(tokens[i + 1], "BETWEEN")){
+        i++;
+        Value low = parseValue(expect(tokens, i , Token::LITERAL).value);
+        if(i + 1 < tokens.size() && matchKeyword(tokens[i + 1], "AND")) i++;
+        Value high = parseValue(expect(tokens, i, Token::LITERAL).value);
+        result.whereBetween = {low, high};
+        return;
+    }
+
+    // LIKE
+    if(i + 1 < tokens.size() && matchKeyword(tokens[i + 1], "LIKE")){
+        i++;
+        std::string pattern = expect(tokens, i, Token::LITERAL).value;
+        pattern.erase(std::remove(pattern.begin(), pattern.end(), '\''), pattern.end());
+        result.whereLike = pattern;
+        return;
+    }
+
     result.whereValue = parseValue(expect(tokens, i, Token::LITERAL).value);
 }
 

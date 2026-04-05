@@ -111,22 +111,6 @@ std::vector<Row> Database::select(const std::string& tableName, const std::vecto
     return iterateRows(table, colIndices);
 }
 
-std::vector<Row> Database::select(const std::string& tableName, const std::string& columnName, const Value& value){
-    Table* table = getTable(tableName);
-    if(!table) return {};
-
-    int index = getColumnIndex(table, columnName);
-
-    std::vector<Row> result;
-    for (const Row& row : table->rows){
-        if(compareValue(row.values[index], value)){
-            result.push_back(row);
-        } 
-    }
-
-    return result;
-}
-
 bool Database::deleteFrom(const std::string& tableName, const std::string& columnName, const Value& value){
     Table* table = getTable(tableName);
     if(!table) return false;

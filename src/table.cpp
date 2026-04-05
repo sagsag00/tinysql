@@ -1,9 +1,7 @@
 #include "table.h"
 
-Database* Database::instance = nullptr;
-Database* Database::getInstance() {
-    if (!instance)
-        instance = new Database();
+Database& Database::getInstance() {
+    static Database instance;
     return instance;
 }
 

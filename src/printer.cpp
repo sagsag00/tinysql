@@ -60,7 +60,7 @@ void printTable(const Table& table){
 }
 
 void printTable(const std::string& tableName){
-    Table* table = Database::getInstance()->getTable(tableName);
+    Table* table = Database::getInstance().getTable(tableName);
     if(!table) {
         std::cout << "Table " << tableName << " not found" << std::endl;
         return;

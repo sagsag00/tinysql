@@ -6,7 +6,7 @@
 class EngineTest: public ::testing::Test{
 protected:
     void SetUp() override {
-        Database::getInstance()->clear();
+        Database::getInstance().clear();
     }
 };
 

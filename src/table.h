@@ -31,7 +31,6 @@ struct Table{
 class Database{
 private:
     Tables tables;
-    static Database* instance;
 
     Database() = default;
     Database(const Database&) = delete;
@@ -42,7 +41,7 @@ private:
     bool compareValue(const Value& a, const Value& b);
 
 public:
-    static Database* getInstance();
+    static Database& getInstance();
 
     // Adds a table to the database
     // @param table The table object

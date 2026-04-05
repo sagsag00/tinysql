@@ -46,3 +46,6 @@ In main I just needed to implement .quit, .tables and print with the printer the
 - Order By: First I decided to add order by, which was very easy, I just needed to add a few functions
 - Update
 - .save/.load
+
+## `Tweaks`
+- Replaced raw singleton pointer with local static, making it be saved in static storage instead of heap

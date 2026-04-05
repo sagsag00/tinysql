@@ -75,7 +75,7 @@ void loadTables(const std::string& path, bool oneFile) {
         std::string line;
         while (std::getline(f, line)) {
             if (line.empty()) continue;
-            Database::getInstance()->addTable(loadTable(f, line));
+            Database::getInstance().addTable(loadTable(f, line));
         }
         return;
     } 
@@ -88,7 +88,7 @@ void loadTables(const std::string& path, bool oneFile) {
 
         std::string line;
         if (std::getline(f, line))
-            Database::getInstance()->addTable(loadTable(f, line));
+            Database::getInstance().addTable(loadTable(f, line));
     }
     
 }

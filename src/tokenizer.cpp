@@ -1,7 +1,9 @@
 #include "tokenizer.h"
 
 static const std::unordered_set<std::string> keywords = {
-    "CREATE", "TABLE", "INSERT", "INTO", "SELECT", "FROM", "WHERE", "DELETE", "DROP", "VALUES", "ORDER", "BY", "UPDATE", "SET"
+    "CREATE", "TABLE", "INSERT", "INTO", "SELECT", "FROM", "WHERE",
+    "DELETE", "DROP", "VALUES", "ORDER", "BY", "UPDATE", "SET",
+    "IN", "BETWEEN", "AND", "LIKE", "NOT"
 };
 
 // Reads literal from input and updates i to be after literals
@@ -23,8 +25,8 @@ static std::string readLiteral(const std::string& input, size_t& i) {
 // Pushes symbol to tokens
 // @param tokens
 // @param ch The symbol
-static void pushSymbol(std::vector<Token>& tokens, const char ch) {
-    tokens.push_back({Token::SYMBOL, std::string(1, ch)});
+static void pushSymbol(std::vector<Token>& tokens, const std::string sym) {
+    tokens.push_back({Token::SYMBOL, sym});
 }
 
 // Checks if a word is a part of the keywords
@@ -41,7 +43,13 @@ static bool isKeyword(const std::string word){
 // @param currentToken
 static void pushCurrentToken(std::vector<Token>& tokens, std::string& currentToken){
     if(currentToken.empty()) return;
-    Token::Type type = isKeyword(currentToken) ? Token::KEYWORD : Token::IDENTIFIER;
+
+    bool isNumber = !currentToken.empty() &&
+                    std::all_of(currentToken.begin(), currentToken.end(), ::isdigit);
+
+    Token::Type type = isNumber ? Token::LITERAL 
+                     : isKeyword(currentToken) ? Token::KEYWORD 
+                     : Token::IDENTIFIER;
     tokens.push_back({type, currentToken});
     currentToken.clear();
 }
@@ -61,9 +69,26 @@ std::vector<Token> tokenize(const std::string& input){
         else if(ch == ' '){
             pushCurrentToken(tokens, currentToken);
         }
-        else if(ch == ',' || ch == '(' || ch == ')' || ch == '='){
+        else if(ch == ',' || ch == '(' || ch == ')' || ch == '=' ||
+                ch == '>' || ch == '<' || ch == '!'){
             pushCurrentToken(tokens, currentToken);
-            pushSymbol(tokens, ch);
+            
+            // Handle >=, <=, !=, <>
+            if(i + 1 < input.size()){
+                char next = input[i + 1];
+                if((ch == '>' || ch == '<' || ch == '!') && next == '='){
+                    pushSymbol(tokens, std::string(1, ch) + "=");
+                    i++;
+                    continue;
+                }
+                if(ch == '<' && next == '>'){
+                    pushSymbol(tokens, "<>");
+                    i++;
+                    continue;
+                }
+            }
+
+            pushSymbol(tokens, std::string(1, ch));
         }
         else {
             currentToken += ch;

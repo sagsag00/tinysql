@@ -31,7 +31,6 @@ struct Table{
 class Database{
 private:
     Tables tables;
-    static Database* instance;
 
     Database() = default;
     Database(const Database&) = delete;
@@ -42,7 +41,7 @@ private:
     bool compareValue(const Value& a, const Value& b);
 
 public:
-    static Database* getInstance();
+    static Database& getInstance();
 
     // Adds a table to the database
     // @param table The table object
@@ -87,13 +86,6 @@ public:
     // @param columns The columns you want to select from
     // @return All the values in the provided columns 
     std::vector<Row> select(const std::string& tableName, const std::vector<Column>& columns);
-
-    // Implementation of SELECT ... WHERE <col> = <value>
-    // @param tableName The name of the table you want to select from
-    // @param columns The column you want to select from
-    // @param value The value you want to compare
-    // @return All the values in the provided columns 
-    std::vector<Row> select(const std::string& tableName, const std::string& columnName, const Value& value);
 
     // Implementation of DELETE FROM <name> WHERE <col> = <value>
     // @param tableName The name of the table you want to delete from

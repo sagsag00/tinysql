@@ -141,7 +141,7 @@ TEST(TokenizerTest, InsertWithLiteral) {
     EXPECT_EQ(tokens[4].type, Token::SYMBOL);    
     EXPECT_EQ(tokens[5].type, Token::LITERAL);    
     EXPECT_EQ(tokens[6].type, Token::SYMBOL);    
-    EXPECT_EQ(tokens[7].type, Token::IDENTIFIER);
+    EXPECT_EQ(tokens[7].type, Token::LITERAL);
     EXPECT_EQ(tokens[8].type, Token::SYMBOL);    
 }
 

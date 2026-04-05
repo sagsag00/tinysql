@@ -27,7 +27,7 @@ static void printResult(const Result& r){
 }
 
 static void printAllTables(){
-    for(Table table : Database::getInstance()->getTables()){
+    for(Table table : Database::getInstance().getTables()){
         formatResult(table.rows, table.columns);
     }
 }
@@ -41,7 +41,7 @@ static void save(std::string& input){
         if (ec) throw std::runtime_error("Cannot create directory: " + path);
     }
 
-    saveTables(Database::getInstance()->getTables(), path, oneFile);
+    saveTables(Database::getInstance().getTables(), path, oneFile);
     std::cout << "Saved to " << path << (oneFile ? "" : "/") << "\n";
 }
 

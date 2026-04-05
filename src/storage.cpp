@@ -55,13 +55,28 @@ static Table loadTable(std::ifstream& f, const std::string& firstLine) {
         Row row;
         size_t i = 0;
         while (std::getline(ss, cell, ',')) {
-            if (table.columns[i].type == Column::Type::INTEGER)
+            if (i >= table.columns.size()) break;
+
+            if (table.columns[i].type == Column::Type::INTEGER){
+                try {
                 row.values.push_back(std::stoi(cell));
+                } catch (const std::invalid_argument&) {
+                    std::cerr << "Invalid integer value: '" << cell << "', defaulting to 0\n";
+                    row.values.push_back(0);
+                } catch (const std::out_of_range&) {
+                    std::cerr << "Integer out of range: '" << cell << "', defaulting to 0\n";
+                    row.values.push_back(0);
+                }
+            }
             else
                 row.values.push_back(cell);
             i++;
         }
-        table.rows.push_back(row);
+        if (i == table.columns.size()){
+            table.rows.push_back(row);
+            continue;
+        }
+        std::cerr << "Skipping malformed row: '" << line << "'\n";
     }
 
     return table;
@@ -75,7 +90,7 @@ void loadTables(const std::string& path, bool oneFile) {
         std::string line;
         while (std::getline(f, line)) {
             if (line.empty()) continue;
-            Database::getInstance()->addTable(loadTable(f, line));
+            Database::getInstance().addTable(loadTable(f, line));
         }
         return;
     } 
@@ -88,7 +103,7 @@ void loadTables(const std::string& path, bool oneFile) {
 
         std::string line;
         if (std::getline(f, line))
-            Database::getInstance()->addTable(loadTable(f, line));
+            Database::getInstance().addTable(loadTable(f, line));
     }
     
 }

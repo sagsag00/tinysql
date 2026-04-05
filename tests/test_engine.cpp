@@ -6,13 +6,24 @@
 class EngineTest: public ::testing::Test{
 protected:
     void SetUp() override {
-        Database::getInstance()->clear();
+        Database::getInstance().clear();
+    }
+
+    Result executeQuery(const std::string& input, const std::string& action){
+        return execute(parse(tokenize(input), action));
     }
 };
 
-static Result executeQuery(const std::string& input, const std::string& action){
-    return execute(parse(tokenize(input), action));
-}
+class EngineWhereTest: public EngineTest{
+protected:
+    void SetUp() override {
+        EngineTest::SetUp();
+        executeQuery("CREATE TABLE users (id INTEGER, name TEXT, age INTEGER)", "create");
+        executeQuery("INSERT INTO users VALUES('1', 'Alice', '30')", "insert");
+        executeQuery("INSERT INTO users VALUES('2', 'Bob', '25')", "insert");
+        executeQuery("INSERT INTO users VALUES('3', 'Charlie', '35')", "insert");
+    }
+};
 
 TEST_F(EngineTest, CreateTable){
     auto r = executeQuery("CREATE TABLE users (id INTEGER, name TEXT)", "create");
@@ -117,6 +128,102 @@ TEST_F(EngineTest, SelectWhereNoMatchReturnsEmpty){
     auto rows = std::get<std::vector<Row>>(
         executeQuery("SELECT * FROM users WHERE name = 'charlie'", "select").result);
     EXPECT_TRUE(rows.empty());
+}
+
+TEST_F(EngineWhereTest, WhereGreaterThan){
+    auto rows = std::get<std::vector<Row>>(
+        executeQuery("SELECT * FROM users WHERE age > '25'", "select").result);
+    EXPECT_EQ(rows.size(), 2u);
+}
+
+TEST_F(EngineWhereTest, WhereLessThan){
+    auto rows = std::get<std::vector<Row>>(
+        executeQuery("SELECT * FROM users WHERE age < '30'", "select").result);
+    EXPECT_EQ(rows.size(), 1u);
+    EXPECT_EQ(std::get<std::string>(rows[0].values[1]), "Bob");
+}
+
+TEST_F(EngineWhereTest, WhereGreaterThanOrEqual){
+    auto rows = std::get<std::vector<Row>>(
+        executeQuery("SELECT * FROM users WHERE age >= '30'", "select").result);
+    EXPECT_EQ(rows.size(), 2u);
+}
+
+TEST_F(EngineWhereTest, WhereLessThanOrEqual){
+    auto rows = std::get<std::vector<Row>>(
+        executeQuery("SELECT * FROM users WHERE age <= '30'", "select").result);
+    EXPECT_EQ(rows.size(), 2u);
+}
+
+TEST_F(EngineWhereTest, WhereNotEqual){;
+    auto rows = std::get<std::vector<Row>>(
+        executeQuery("SELECT * FROM users WHERE age != '25'", "select").result);
+    EXPECT_EQ(rows.size(), 2u);
+}
+
+TEST_F(EngineWhereTest, WhereBetween){
+    auto rows = std::get<std::vector<Row>>(
+        executeQuery("SELECT * FROM users WHERE age BETWEEN '25' AND '30'", "select").result);
+    EXPECT_EQ(rows.size(), 2u);
+}
+
+TEST_F(EngineWhereTest, WhereNotBetween){
+    auto rows = std::get<std::vector<Row>>(
+        executeQuery("SELECT * FROM users WHERE age NOT BETWEEN '25' AND '30'", "select").result);
+    EXPECT_EQ(rows.size(), 1u);
+    EXPECT_EQ(std::get<std::string>(rows[0].values[1]), "Charlie");
+}
+
+TEST_F(EngineWhereTest, WhereIn){
+    auto rows = std::get<std::vector<Row>>(
+        executeQuery("SELECT * FROM users WHERE age IN ('25', '35')", "select").result);
+    EXPECT_EQ(rows.size(), 2u);
+}
+
+TEST_F(EngineWhereTest, WhereNotIn){
+    auto rows = std::get<std::vector<Row>>(
+        executeQuery("SELECT * FROM users WHERE age NOT IN ('25', '35')", "select").result);
+    EXPECT_EQ(rows.size(), 1u);
+    EXPECT_EQ(std::get<std::string>(rows[0].values[1]), "Alice");
+}
+
+TEST_F(EngineWhereTest, WhereLikePrefix){
+    auto rows = std::get<std::vector<Row>>(
+        executeQuery("SELECT * FROM users WHERE name LIKE 'A%'", "select").result);
+    EXPECT_EQ(rows.size(), 1u);
+    EXPECT_EQ(std::get<std::string>(rows[0].values[1]), "Alice");
+}
+
+TEST_F(EngineWhereTest, WhereLikeSuffix){
+    auto rows = std::get<std::vector<Row>>(
+        executeQuery("SELECT * FROM users WHERE name LIKE '%e'", "select").result);
+    EXPECT_EQ(rows.size(), 2u);
+}
+
+TEST_F(EngineWhereTest, WhereLikeContains){
+    auto rows = std::get<std::vector<Row>>(
+        executeQuery("SELECT * FROM users WHERE name LIKE '%li%'", "select").result);
+    EXPECT_EQ(rows.size(), 2u);
+}
+
+TEST_F(EngineWhereTest, WhereNotLike){
+    auto rows = std::get<std::vector<Row>>(
+        executeQuery("SELECT * FROM users WHERE name NOT LIKE 'A%'", "select").result);
+    EXPECT_EQ(rows.size(), 2u);
+}
+
+TEST_F(EngineWhereTest, WhereNotComparison){
+    auto rows = std::get<std::vector<Row>>(
+        executeQuery("SELECT * FROM users WHERE NOT age = '25'", "select").result);
+    EXPECT_EQ(rows.size(), 2u);
+}
+
+TEST_F(EngineWhereTest, WhereWithOrderBy){
+    auto rows = std::get<std::vector<Row>>(
+        executeQuery("SELECT * FROM users WHERE age > '25' ORDER BY age DESC", "select").result);
+    EXPECT_EQ(rows.size(), 2u);
+    EXPECT_EQ(std::get<int>(rows[0].values[2]), 35);
+    EXPECT_EQ(std::get<int>(rows[1].values[2]), 30);
 }
 
 TEST_F(EngineTest, UpdateData){

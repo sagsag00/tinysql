@@ -59,6 +59,32 @@ SELECT * FROM {table} WHERE {col} = '{value}'
 SELECT {cols} FROM {table} 
 SELECT {cols|*} FROM {table} ORDER BY {col} ASC|DESC
 SELECT {cols|*} FROM {table} WHERE {col} = '{value}' ORDER BY {col} ASC|DESC
+
+-- Comparison operators
+SELECT {cols|*} FROM {table} WHERE {col} != '{value}'
+SELECT {cols|*} FROM {table} WHERE {col} > {value}
+SELECT {cols|*} FROM {table} WHERE {col} < {value}
+SELECT {cols|*} FROM {table} WHERE {col} >= {value}
+SELECT {cols|*} FROM {table} WHERE {col} <= {value}
+SELECT {cols|*} FROM {table} WHERE {col} <> '{value}'
+
+-- BETWEEN
+SELECT {cols|*} FROM {table} WHERE {col} BETWEEN {value} AND {value}
+SELECT {cols|*} FROM {table} WHERE {col} NOT BETWEEN {value} AND {value}
+
+-- IN
+SELECT {cols|*} FROM {table} WHERE {col} IN ({value}, {value}, ...)
+SELECT {cols|*} FROM {table} WHERE {col} NOT IN ({value}, {value}, ...)
+
+-- LIKE (% matches anything)
+SELECT {cols|*} FROM {table} WHERE {col} LIKE '{value}%'
+SELECT {cols|*} FROM {table} WHERE {col} LIKE '%{value}'
+SELECT {cols|*} FROM {table} WHERE {col} LIKE '%{value}%'
+SELECT {cols|*} FROM {table} WHERE {col} NOT LIKE '{value}%'
+
+-- NOT
+SELECT {cols|*} FROM {table} WHERE NOT {col} = '{value}'
+SELECT {cols|*} FROM {table} WHERE NOT {col} > {value}
 ```
  
 **Update rows:**

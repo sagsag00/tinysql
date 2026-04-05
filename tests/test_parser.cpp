@@ -47,6 +47,82 @@ TEST(ParserTest, OrderByWhere){
     EXPECT_TRUE(q.orderByDesc);
 }
 
+TEST(ParserTest, WhereGreaterThan){
+    auto q = tokenizeAndParse("SELECT * FROM users WHERE age > '25'", "select");
+    ASSERT_TRUE(q.whereColumn.has_value());
+    EXPECT_EQ(q.whereColumn.value(), "age");
+    ASSERT_TRUE(q.whereOperator.has_value());
+    EXPECT_EQ(q.whereOperator.value(), ">");
+    ASSERT_TRUE(q.whereValue.has_value());
+    EXPECT_EQ(std::get<int>(q.whereValue.value()), 25);
+}
+
+TEST(ParserTest, WhereLessThanOrEqual){
+    auto q = tokenizeAndParse("SELECT * FROM users WHERE age <= '30'", "select");
+    ASSERT_TRUE(q.whereOperator.has_value());
+    EXPECT_EQ(q.whereOperator.value(), "<=");
+}
+
+TEST(ParserTest, WhereNotEqual){
+    auto q = tokenizeAndParse("SELECT * FROM users WHERE age != '25'", "select");
+    ASSERT_TRUE(q.whereOperator.has_value());
+    EXPECT_EQ(q.whereOperator.value(), "!=");
+}
+
+TEST(ParserTest, WhereBetween){
+    auto q = tokenizeAndParse("SELECT * FROM users WHERE age BETWEEN '25' AND '35'", "select");
+    ASSERT_TRUE(q.whereColumn.has_value());
+    EXPECT_EQ(q.whereColumn.value(), "age");
+    ASSERT_TRUE(q.whereBetween.has_value());
+    EXPECT_EQ(std::get<int>(q.whereBetween->first), 25);
+    EXPECT_EQ(std::get<int>(q.whereBetween->second), 35);
+}
+
+TEST(ParserTest, WhereIn){
+    auto q = tokenizeAndParse("SELECT * FROM users WHERE age IN ('25', '35')", "select");
+    ASSERT_TRUE(q.whereColumn.has_value());
+    EXPECT_EQ(q.whereColumn.value(), "age");
+    ASSERT_TRUE(q.whereInValues.has_value());
+    EXPECT_EQ(q.whereInValues->size(), 2u);
+    EXPECT_EQ(std::get<int>(q.whereInValues->at(0)), 25);
+    EXPECT_EQ(std::get<int>(q.whereInValues->at(1)), 35);
+}
+
+TEST(ParserTest, WhereLike){
+    auto q = tokenizeAndParse("SELECT * FROM users WHERE name LIKE 'A%'", "select");
+    ASSERT_TRUE(q.whereColumn.has_value());
+    EXPECT_EQ(q.whereColumn.value(), "name");
+    ASSERT_TRUE(q.whereLike.has_value());
+    EXPECT_EQ(q.whereLike.value(), "A%");
+}
+
+TEST(ParserTest, WhereNotBetween){
+    auto q = tokenizeAndParse("SELECT * FROM users WHERE age NOT BETWEEN '25' AND '35'", "select");
+    ASSERT_TRUE(q.whereBetween.has_value());
+    EXPECT_TRUE(q.whereNot);
+}
+
+TEST(ParserTest, WhereNotIn){
+    auto q = tokenizeAndParse("SELECT * FROM users WHERE age NOT IN ('25', '35')", "select");
+    ASSERT_TRUE(q.whereInValues.has_value());
+    EXPECT_TRUE(q.whereNot);
+}
+
+TEST(ParserTest, WhereNotLike){
+    auto q = tokenizeAndParse("SELECT * FROM users WHERE name NOT LIKE 'A%'", "select");
+    ASSERT_TRUE(q.whereLike.has_value());
+    EXPECT_TRUE(q.whereNot);
+}
+
+TEST(ParserTest, WhereNotComparison){
+    auto q = tokenizeAndParse("SELECT * FROM users WHERE NOT age = '25'", "select");
+    ASSERT_TRUE(q.whereColumn.has_value());
+    EXPECT_EQ(q.whereColumn.value(), "age");
+    EXPECT_TRUE(q.whereNot);
+    ASSERT_TRUE(q.whereValue.has_value());
+    EXPECT_EQ(std::get<int>(q.whereValue.value()), 25);
+}
+
 TEST(ParserTest, InsertIntoTable){
     auto q = tokenizeAndParse("INSERT INTO users VALUES('alice', '30')", "insert");
     EXPECT_EQ(q.action, "insert");

@@ -49,4 +49,5 @@ In main I just needed to implement .quit, .tables and print with the printer the
 
 ## `Tweaks`
 - Replaced raw singleton pointer with local static, making it be saved in static storage instead of heap
-- Made `select` in `engine.cpp` get all ofhe rows before sorting and then filter, to make sure the index won't go out of bounds.
+- Made `select` in `engine.cpp` get all ofhe rows before sorting and then filter, to make sure the index won't go out of bounds
+- Fixed errors not getting caught while loading a csv

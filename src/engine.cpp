@@ -80,31 +80,47 @@ std::vector<Row> select(const ParsedQuery& query){
     std::vector<Row> rows;
 
     if(!query.whereValue.has_value()){
-        if(!query.columns.has_value()){
-            rows = Database::getInstance().select(query.tableName);
-        }
-        else
-            rows = Database::getInstance().select(query.tableName, *query.columns);
+        rows = Database::getInstance().select(query.tableName);
     } else {
         if(!query.whereColumn.has_value()) return {};
         rows = Database::getInstance().select(query.tableName, *query.whereColumn, *query.whereValue);
     }
 
-    if(!query.column.has_value()) return rows;
+    if(query.column.has_value()){
+        const std::vector<Column>* cols = Database::getInstance().getColumns(query.tableName);
+        if(cols){
+            int idx = -1;
+            for (size_t i = 0; i < cols->size(); i++){
+                if((*cols)[i].name == *query.column) { idx = i; break; } 
+            }
+            if(idx != -1){
+                std::sort(rows.begin(), rows.end(), [&](Row& a, Row&b){
+                    return compareVariants(a.values[idx], b.values[idx], query.orderByDesc);
+                });
+            }
+        }
+    }
     
-    const std::vector<Column>* cols = Database::getInstance().getColumns(query.tableName);
-    if(!cols) return rows;
+    // SELECT cols FROM
+    if(query.columns.has_value()){
+        const std::vector<Column>* cols = Database::getInstance().getColumns(query.tableName);
+        if(!cols) return rows;
 
-    int idx = -1;
-    for(size_t i = 0; i < cols->size(); i++){
-        if((*cols)[i].name == *query.column) { idx = i; break; }
-    }
-    if(idx != -1){
-        std::sort(rows.begin(), rows.end(), [&](const Row& a, const Row& b){
-            return compareVariants(a.values[idx], b.values[idx], query.orderByDesc);
-        });
-    }
+        std::vector<int> colIndices;
+        for(const Column& col: * query.columns){
+            for(size_t i = 0; i < cols->size(); i++){
+                if((*cols)[i].name == col.name) { colIndices.push_back(i); break; }
+            }
+        }
 
+        for(Row& row : rows){
+            std::vector<Value> trimmed;
+            for(int idx : colIndices){
+                trimmed.push_back(row.values[idx]);
+            }
+            row.values = trimmed;
+        }
+    }
     return rows;
 }
 
